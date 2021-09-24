@@ -1,0 +1,37 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="vander.gabriel.intents.MainActivity">
+    <item
+        android:id="@+id/openInBrowserMenuItem"
+        android:icon="@drawable/ic_baseline_open_in_browser_24"
+        android:title="@string/open_in_browser"
+        app:showAsAction="ifRoom" />
+    <item
+        android:title="@string/other_examples"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/callPhoneNumberMenuItem"
+                android:title="@string/call_phone_number" />
+            <item
+                android:id="@+id/dialPhoneNumberMenuItem"
+                android:title="@string/dial_phone_number" />
+            <item
+                android:id="@+id/pickImageMenuItem"
+                android:title="@string/pick_image" />
+            <item
+                android:id="@+id/openChooserMenuItem"
+                android:title="@string/launch_app" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/launchActionMenuItem"
+        android:title="@string/launch_action"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/exitMenuItem"
+        android:icon="@drawable/ic_baseline_exit_to_app_24"
+        android:title="@string/exit"
+        app:showAsAction="ifRoom" />
+</menu>
