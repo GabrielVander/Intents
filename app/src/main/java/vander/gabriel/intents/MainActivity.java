@@ -3,10 +3,11 @@ package vander.gabriel.intents;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.URLUtil;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -52,9 +53,15 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        final int openInBrowserMenuItem = R.id.openInBrowserMenuItem;
+        final int dialPhoneNumberMenuItem = R.id.dialPhoneNumberMenuItem;
+
         switch (id) {
-            case R.id.openInBrowserMenuItem:
+            case openInBrowserMenuItem:
                 openParameterAsWebLink();
+                return true;
+            case dialPhoneNumberMenuItem:
+                dialParameterAsPhoneNumber();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -63,20 +70,44 @@ public class MainActivity extends AppCompatActivity {
 
     private void openParameterAsWebLink() {
         String parameter = mainViewModel.getParameter().getValue();
+        parameter = getParameterAsUrl(parameter);
+
         if (parameter != null) {
-            parameter = getParameterAsUrl(parameter);
-            Intent actionViewIntent = new Intent(Intent.ACTION_VIEW);
-            actionViewIntent.setData(Uri.parse(parameter));
-            startActivity(actionViewIntent);
+            launchActionIntent(parameter, Intent.ACTION_VIEW);
         }
     }
 
-    @NonNull
+    private void dialParameterAsPhoneNumber() {
+        String parameter = mainViewModel.getParameter().getValue();
+        parameter = getParameterAsPhoneNumber(parameter);
+
+        if (parameter != null) {
+            launchActionIntent(parameter, Intent.ACTION_DIAL);
+        }
+    }
+
+    private void launchActionIntent(String parameter, String actionDial) {
+        Intent actionViewIntent = new Intent(actionDial);
+        actionViewIntent.setData(Uri.parse(parameter));
+        startActivity(actionViewIntent);
+    }
+
     private String getParameterAsUrl(String parameter) {
+        if (parameter == null) return null;
+
         if (!parameter.startsWith("https://") && !parameter.startsWith("http://")) {
             parameter = "http://" + parameter;
         }
-        return parameter;
+
+        return URLUtil.isValidUrl(parameter) ? parameter : null;
+    }
+
+    private String getParameterAsPhoneNumber(String parameter) {
+        if (parameter == null) return null;
+
+        if (!PhoneNumberUtils.isGlobalPhoneNumber(parameter)) return null;
+
+        return String.format("tel: %s", parameter);
     }
 
     @Override
