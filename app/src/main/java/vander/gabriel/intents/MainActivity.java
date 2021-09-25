@@ -1,6 +1,8 @@
 package vander.gabriel.intents;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
@@ -9,6 +11,8 @@ import android.view.MenuItem;
 import android.webkit.URLUtil;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -22,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
+
+    private final int CAL_PERMISSION_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         final int openInBrowserMenuItem = R.id.openInBrowserMenuItem;
         final int dialPhoneNumberMenuItem = R.id.dialPhoneNumberMenuItem;
+        final int callPhoneNumberMenuItem = R.id.callPhoneNumberMenuItem;
 
         switch (id) {
             case openInBrowserMenuItem:
@@ -63,8 +70,25 @@ public class MainActivity extends AppCompatActivity {
             case dialPhoneNumberMenuItem:
                 dialParameterAsPhoneNumber();
                 return true;
+            case callPhoneNumberMenuItem:
+                callParameterAsPhoneNumber();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void callParameterAsPhoneNumber() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{(Manifest.permission.CALL_PHONE)},
+                    CAL_PERMISSION_CODE);
+        } else {
+            String parameter = mainViewModel.getParameter().getValue();
+            parameter = getParameterAsPhoneNumber(parameter);
+
+            if (parameter != null) {
+                launchActionIntent(parameter, Intent.ACTION_CALL);
+            }
         }
     }
 
@@ -86,10 +110,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void launchActionIntent(String parameter, String actionDial) {
-        Intent actionViewIntent = new Intent(actionDial);
-        actionViewIntent.setData(Uri.parse(parameter));
-        startActivity(actionViewIntent);
+    private void launchActionIntent(String parameter, String action) {
+        Intent actionIntent = new Intent(action);
+        actionIntent.setData(Uri.parse(parameter));
+        startActivity(actionIntent);
     }
 
     private String getParameterAsUrl(String parameter) {
