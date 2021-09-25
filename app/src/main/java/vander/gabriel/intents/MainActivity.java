@@ -23,11 +23,10 @@ import vander.gabriel.intents.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final int CAL_PERMISSION_CODE = 100;
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
-
-    private final int CAL_PERMISSION_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +59,16 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         final int openInBrowserMenuItem = R.id.openInBrowserMenuItem;
+        final int exitMenuItem = R.id.exitMenuItem;
         final int dialPhoneNumberMenuItem = R.id.dialPhoneNumberMenuItem;
         final int callPhoneNumberMenuItem = R.id.callPhoneNumberMenuItem;
 
         switch (id) {
             case openInBrowserMenuItem:
                 openParameterAsWebLink();
+                return true;
+            case exitMenuItem:
+                finish();
                 return true;
             case dialPhoneNumberMenuItem:
                 dialParameterAsPhoneNumber();
