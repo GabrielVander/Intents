@@ -23,16 +23,14 @@ import vander.gabriel.intents.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int CAL_PERMISSION_CODE = 100;
     private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        vander.gabriel.intents.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         setContentView(binding.getRoot());
@@ -62,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         final int exitMenuItem = R.id.exitMenuItem;
         final int dialPhoneNumberMenuItem = R.id.dialPhoneNumberMenuItem;
         final int callPhoneNumberMenuItem = R.id.callPhoneNumberMenuItem;
+        final int launchActionMenuItem = R.id.launchActionMenuItem;
 
         switch (id) {
             case openInBrowserMenuItem:
@@ -76,13 +75,22 @@ public class MainActivity extends AppCompatActivity {
             case callPhoneNumberMenuItem:
                 callParameterAsPhoneNumber();
                 return true;
+            case launchActionMenuItem:
+                openSecondFragment();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void openSecondFragment() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        navController.navigate(R.id.action_FirstFragment_to_SecondFragment);
+    }
+
     private void callParameterAsPhoneNumber() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            int CAL_PERMISSION_CODE = 100;
             ActivityCompat.requestPermissions(this, new String[]{(Manifest.permission.CALL_PHONE)},
                     CAL_PERMISSION_CODE);
         } else {
