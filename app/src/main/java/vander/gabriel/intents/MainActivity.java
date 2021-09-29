@@ -1,15 +1,21 @@
 package vander.gabriel.intents;
 
+import static android.content.Intent.ACTION_PICK;
+import static android.content.Intent.ACTION_VIEW;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.telephony.PhoneNumberUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.URLUtil;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -19,12 +25,16 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import java.io.File;
+
 import vander.gabriel.intents.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private MainViewModel mainViewModel;
+
+    private ActivityResultLauncher<Intent> showImageLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +50,16 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+
+        showImageLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                final Intent pickImageIntent = result.getData();
+                if (pickImageIntent != null) {
+                    final Uri imageUri = pickImageIntent.getData();
+                    launchActionIntent(imageUri.toString(), ACTION_VIEW);
+                }
+            }
+        });
     }
 
     @Override
@@ -61,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         final int dialPhoneNumberMenuItem = R.id.dialPhoneNumberMenuItem;
         final int callPhoneNumberMenuItem = R.id.callPhoneNumberMenuItem;
         final int launchActionMenuItem = R.id.launchActionMenuItem;
+        final int pickImageMenuItem = R.id.pickImageMenuItem;
 
         switch (id) {
             case openInBrowserMenuItem:
@@ -78,8 +99,20 @@ public class MainActivity extends AppCompatActivity {
             case launchActionMenuItem:
                 openSecondFragment();
                 return true;
+            case pickImageMenuItem:
+                pickImage();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void pickImage() {
+        File directory = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (directory != null) {
+            Intent actionIntent = new Intent(ACTION_PICK);
+            actionIntent.setDataAndType(Uri.parse(directory.getPath()), "image/*");
+            showImageLauncher.launch(actionIntent);
         }
     }
 
@@ -90,9 +123,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void callParameterAsPhoneNumber() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            int CAL_PERMISSION_CODE = 100;
+            int calPermissionCode = 101;
             ActivityCompat.requestPermissions(this, new String[]{(Manifest.permission.CALL_PHONE)},
-                    CAL_PERMISSION_CODE);
+                    calPermissionCode);
         } else {
             String parameter = mainViewModel.getParameter().getValue();
             parameter = getParameterAsPhoneNumber(parameter);
